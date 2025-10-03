@@ -47,7 +47,10 @@ while True:
 
     df = df.dropna()
 
-    print (df.iloc[-1])
+    if len(df > 0):
+        print (df.iloc[-1])
+    else:
+        sleep(1)
 
     df.to_csv('data/boinha.csv', float_format='%.6f', index=True)
 
