@@ -1,4 +1,5 @@
 # cliente_socket.py
+
 import socket
 import pandas as pd
 from io import StringIO

@@ -1,4 +1,5 @@
 # cliente_dashboard.py
+
 import socket
 import threading
 import pandas as pd
