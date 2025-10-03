@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 # --- Configurações ---
 csv_filename = "data/sensores.csv"
-MAX_LINES = 100000       # número máximo de linhas no CSV
+MAX_LINES = 5000       # número máximo de linhas no CSV
 SAVE_INTERVAL = 1.0    # salva no CSV a cada X segundos
 SENSOR_TYPES = [
     "accelerometer",

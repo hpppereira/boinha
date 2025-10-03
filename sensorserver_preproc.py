@@ -5,6 +5,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 from time import sleep
 
+
+df_concat = pd.read_csv('data/boinha.csv', parse_dates=True, index_col='datetime')
+
 while True:
 
     # lê o CSV
@@ -26,8 +29,9 @@ while True:
 
         # data em hora local
         # aux['date'] = pd.to_datetime(aux['wall_time'], unit='s') - timedelta(hours=3)
+        aux['datetime'] = pd.to_datetime(aux['datetime'])
 
-        aux.set_index('date', inplace=True)
+        aux.set_index('datetime', inplace=True)
 
         aux.drop(['wall_time', 'sensor_type', 'timestamp_ns'], axis=1, inplace=True)
 
@@ -36,6 +40,10 @@ while True:
         aux = aux.resample('0.2s').mean()
 
         df = pd.concat([df, aux], axis=1)
+        # df = df.join(aux, how='outer')
+
+    df_concat = pd.concat([df_concat.drop_duplicates(),
+                           df.drop_duplicates()], axis=0)
 
     df = df.dropna()
 
@@ -43,6 +51,6 @@ while True:
 
     df.to_csv('data/boinha.csv', float_format='%.6f', index=True)
 
-    # sleep(0.5)
+    sleep(1)
 
-    # print (aux.index)
+    print ('\n')
