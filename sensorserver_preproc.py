@@ -6,54 +6,60 @@ from datetime import datetime, timedelta
 from time import sleep
 
 
-df_concat = pd.read_csv('data/boinha.csv', parse_dates=True, index_col='datetime')
 
 while True:
 
-    # lê o CSV
-    df1 = pd.read_csv("data/sensores.csv")
+    df_concat = pd.read_csv('data/boinha.csv', parse_dates=True, index_col='date')
 
-    # remove espacos do cabecalho
-    df1.columns = [c.strip() for c in df1.columns]
+    try:
+        # lê o CSV
+        df1 = pd.read_csv("data/sensores.csv")
 
-    # cria um dicionário de DataFrames, um por sensor
-    dfs = {sensor: g.reset_index(drop=True) for sensor, g in df1.groupby("sensor_type")}
+        # remove espacos do cabecalho
+        df1.columns = [c.strip() for c in df1.columns]
 
-    # remove espacos 
-    dfs = {sensor.strip().split('.')[-1]: g for sensor, g in dfs.items()}
+        # cria um dicionário de DataFrames, um por sensor
+        dfs = {sensor: g.reset_index(drop=True) for sensor, g in df1.groupby("sensor_type")}
 
-    df = pd.DataFrame()
-    for k in dfs.keys():
+        # remove espacos 
+        dfs = {sensor.strip().split('.')[-1]: g for sensor, g in dfs.items()}
 
-        aux = dfs[k]
+        df = pd.DataFrame()
+        for k in dfs.keys():
 
-        # data em hora local
-        # aux['date'] = pd.to_datetime(aux['wall_time'], unit='s') - timedelta(hours=3)
-        aux['datetime'] = pd.to_datetime(aux['datetime'])
+            aux = dfs[k]
 
-        aux.set_index('datetime', inplace=True)
+            # data em hora local
+            # aux['date'] = pd.to_datetime(aux['wall_time'], unit='s') - timedelta(hours=3)
+            aux['date'] = pd.to_datetime(aux['date'])
 
-        aux.drop(['wall_time', 'sensor_type', 'timestamp_ns'], axis=1, inplace=True)
+            aux.set_index('date', inplace=True)
 
-        aux.columns = [f'{k}_{c}' for c in aux.columns]
+            aux.drop(['wall_time', 'sensor_type', 'timestamp_ns'], axis=1, inplace=True)
 
-        aux = aux.resample('0.2s').mean()
+            aux.columns = [f'{k}_{c}' for c in aux.columns]
 
-        df = pd.concat([df, aux], axis=1)
-        # df = df.join(aux, how='outer')
+            aux = aux.resample('0.2s').mean()
 
-    df_concat = pd.concat([df_concat.drop_duplicates(),
-                           df.drop_duplicates()], axis=0)
+            df = pd.concat([df, aux], axis=1)
+            # df = df.join(aux, how='outer')
 
-    df = df.dropna()
+        df_concat = pd.concat([df_concat.drop_duplicates(),
+                            df.drop_duplicates()], axis=0)
 
-    if len(df > 0):
-        print (df.iloc[-1])
-    else:
+        df = df.dropna()
+
+        if len(df > 0):
+            print (df.iloc[-1])
+        else:
+            sleep(1)
+
+        print ('Salvando arquivo com series temporais')
+        df.to_csv('data/boinha.csv', float_format='%.6f', index=True)
+
         sleep(1)
 
-    df.to_csv('data/boinha.csv', float_format='%.6f', index=True)
+        print ('\n')
 
-    sleep(1)
-
-    print ('\n')
+    except:
+        sleep(1)
